@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:camel="http://camel.apache.org/schema/spring"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+    <!-- Define a traditional camel context here -->
+    <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
+        <restConfiguration apiContextPath="api-docs" bindingMode="auto"
+            component="undertow" contextPath="/customer"
+            enableCORS="true" port="8080">
+            <apiProperty key="cors" value="true"/>
+            <apiProperty key="api.title" value="Customer Service"/>
+            <apiProperty key="api.version" value="1.0.0"/>
+        </restConfiguration>
+        <rest id="rest-209e7d08-9b58-4194-b60c-488f7aec1a72">
+            <get uri="/id/{idno}">
+                <param dataType="string"
+                    description="Customer ID number" name="idno"
+                    required="true" type="path"/>
+                <to uri="direct:rest1"/>
+            </get>
+            <put uri="/add">
+                <param name="body" required="false" type="body"/>
+                <to uri="direct:rest2"/>
+            </put>
+        </rest>
+        <route id="rest1-route">
+            <from id="restone" uri="direct:rest1"/>
+            <setBody id="route-setBody1">
+                <simple>bean:CustomerList?method=get(0)</simple>
+            </setBody>
+        </route>
+        <route id="rest2-route">
+            <from id="resttwo" uri="direct:rest2"/>
+            <log id="input-log" message=">>> ${body}"/>
+            <setBody id="route-setBody2">
+                <simple>Customer created</simple>
+            </setBody>
+        </route>
+    </camelContext>
+</beans>
